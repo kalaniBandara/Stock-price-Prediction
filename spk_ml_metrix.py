@@ -5,7 +5,7 @@ import yfinance as yf
 from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import LSTM, Dense, Dropout
-from sklearn.metrics import mean_squared_error, mean_absolute_error
+from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 
 # Step 1: Load and Visualize Data
 data = yf.download('SPK.NZ', start='2018-01-01', end='2023-12-31')
@@ -63,10 +63,27 @@ predictions = scaler.inverse_transform(predictions.reshape(-1, 1))
 y_test_unscaled = scaler.inverse_transform(y_test.reshape(-1, 1))
 
 # Step 6: Evaluate Model
+
+# Root Mean Squared Error (RMSE)
 rmse = np.sqrt(mean_squared_error(y_test_unscaled, predictions))
-mae = mean_absolute_error(y_test_unscaled, predictions)
 print(f'Root Mean Squared Error (RMSE): {rmse}')
+
+# Mean Absolute Error (MAE)
+mae = mean_absolute_error(y_test_unscaled, predictions)
 print(f'Mean Absolute Error (MAE): {mae}')
+
+# R-squared (R²) Score
+r2 = r2_score(y_test_unscaled, predictions)
+print(f'R-squared (R^2) Score: {r2}')
+
+# Mean Absolute Percentage Error (MAPE)
+mape = np.mean(np.abs((y_test_unscaled - predictions) / y_test_unscaled)) * 100
+print(f'Mean Absolute Percentage Error (MAPE): {mape}%')
+
+# Tolerance-based Accuracy (e.g., within 5% tolerance of the actual value)
+tolerance = 0.05
+accuracy_within_tolerance = np.mean(np.abs((y_test_unscaled - predictions) / y_test_unscaled) <= tolerance) * 100
+print(f'Accuracy within ±5% tolerance: {accuracy_within_tolerance}%')
 
 # Step 7: Plot the Results
 train = data[:train_size + look_back]
@@ -81,77 +98,3 @@ plt.xlabel('Date')
 plt.ylabel('Close Price (NZD)')
 plt.legend(['Train', 'Actual Price', 'Predicted Price'], loc='lower right')
 plt.show()
-
-# from sklearn.metrics import r2_score
-
-# # Calculate additional metrics
-# rmse = np.sqrt(mean_squared_error(y_test_unscaled, predictions))
-# mae = mean_absolute_error(y_test_unscaled, predictions)
-# r2 = r2_score(y_test_unscaled, predictions)
-# mape = np.mean(np.abs((y_test_unscaled - predictions) / y_test_unscaled)) * 100
-
-# # Print metrics
-# print(f'Root Mean Squared Error (RMSE): {rmse}')
-# print(f'Mean Absolute Error (MAE): {mae}')
-# print(f'R-squared (R^2) Score: {r2}')
-# print(f'Mean Absolute Percentage Error (MAPE): {mape}%')
-
-# # Plot the results with metrics
-# plt.figure(figsize=(14, 7))
-# plt.plot(train['Close'], label='Training Data')
-# plt.plot(valid[['Close', 'Predictions']])
-# plt.title('Spark NZ Stock Price Prediction')
-# plt.xlabel('Date')
-# plt.ylabel('Close Price (NZD)')
-# plt.legend(['Train', 'Actual Price', 'Predicted Price'], loc='lower right')
-
-# # Display metrics on the plot
-# plt.text(valid.index[0], max(valid['Close']) * 1.05,
-#          f'RMSE: {rmse:.2f}\nMAE: {mae:.2f}\nR²: {r2:.2f}\nMAPE: {mape:.2f}%',
-#          bbox=dict(facecolor='white', alpha=0.5),
-#          fontsize=10, color='black')
-
-# plt.show()
-
-
-# from sklearn.metrics import r2_score
-
-# # Calculate RMSE (already computed)
-# rmse = np.sqrt(mean_squared_error(y_test_unscaled, predictions))
-# print(f'Root Mean Squared Error (RMSE): {rmse}')
-
-# # Mean Absolute Error (MAE) (already computed)
-# mae = mean_absolute_error(y_test_unscaled, predictions)
-# print(f'Mean Absolute Error (MAE): {mae}')
-
-# # R-squared (R^2) score
-# r2 = r2_score(y_test_unscaled, predictions)
-# print(f'R-squared (R^2) Score: {r2}')
-
-# # Mean Absolute Percentage Error (MAPE)
-# mape = np.mean(np.abs((y_test_unscaled - predictions) / y_test_unscaled)) * 100
-# print(f'Mean Absolute Percentage Error (MAPE): {mape}%')
-
-from sklearn.metrics import r2_score
-
-# Calculate metrics
-rmse = np.sqrt(mean_squared_error(y_test_unscaled, predictions))
-mae = mean_absolute_error(y_test_unscaled, predictions)
-r2 = r2_score(y_test_unscaled, predictions)
-mape = np.mean(np.abs((y_test_unscaled - predictions) / y_test_unscaled)) * 100
-
-# Plot the stock price and predictions
-plt.figure(figsize=(14, 7))
-plt.plot(train['Close'], label='Training Data')
-plt.plot(valid[['Close', 'Predictions']])
-plt.title('Spark NZ Stock Price Prediction')
-plt.xlabel('Date')
-plt.ylabel('Close Price (NZD)')
-plt.legend(['Train', 'Actual Price', 'Predicted Price'], loc='lower right')
-plt.show()
-
-# Display the metrics below the plot
-print(f'Root Mean Squared Error (RMSE): {rmse}')
-print(f'Mean Absolute Error (MAE): {mae}')
-print(f'R-squared (R^2) Score: {r2}')
-print(f'Mean Absolute Percentage Error (MAPE): {mape}%')
